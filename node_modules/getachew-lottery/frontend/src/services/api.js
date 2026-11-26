@@ -1,5 +1,12 @@
 import { tg } from './telegram'
 
+// When the app (Vercel/Cloudflare) and the server (Railway) live at different addresses,
+// set VITE_API_URL=https://your-server.up.railway.app when building the frontend.
+const BASE = (import.meta.env.VITE_API_URL || 'https://gb-production-f5f46c29.up.railway.app').replace(/\/+$/, '')
+
+// car photos / receipts are stored on the server: "/uploads/x.jpg" -> full address
+export const asset = (u) => (u && u.startsWith('/') ? BASE + u : u)
+
 export class ApiError extends Error {
   constructor(status, code, data) {
     super(code)
@@ -33,7 +40,7 @@ async function request(method, path, body) {
   }
   let res
   try {
-    res = await fetch(path, opts)
+    res = await fetch(BASE + path, opts)
   } catch {
     throw new ApiError(0, 'network', null)
   }
