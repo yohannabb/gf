@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import Icon from '@/components/Icon.vue'
-import { api } from '@/services/api'
+import { api, asset } from '@/services/api'
 import { t } from '@/i18n'
 import { fmt, pad4 } from '@/services/format'
 
@@ -31,7 +31,7 @@ const date = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', mo
   <div v-else class="flex flex-col gap-3">
     <article v-for="o in orders" :key="o.code" class="card p-4">
       <div class="flex items-center gap-3">
-        <img :src="o.lottery?.imageUrl" alt="" class="w-14 h-14 rounded-2xl object-cover flex-none" />
+        <img :src="asset(o.lottery?.imageUrl)" alt="" class="w-14 h-14 rounded-2xl object-cover flex-none" />
         <div class="min-w-0 flex-1">
           <div class="font-display font-bold text-[17px] truncate">{{ o.lottery?.carName }}</div>
           <div class="muted text-[13px] truncate">#{{ o.code }} · {{ date(o.createdAt) }}</div>

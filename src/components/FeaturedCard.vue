@@ -1,4 +1,5 @@
 <script setup>
+import { asset } from '@/services/api'
 import { computed } from 'vue'
 import Icon from './Icon.vue'
 import Countdown from './Countdown.vue'
@@ -14,7 +15,7 @@ const over = computed(() => l.value.remaining === 0)
 <template>
   <article class="card">
     <div class="relative" style="height: 232px">
-      <img :src="l.imageUrl" :alt="l.carName" class="w-full h-full object-cover" />
+      <img :src="asset(l.imageUrl)" :alt="l.carName" class="w-full h-full object-cover" />
       <div class="absolute inset-x-0 bottom-0 h-28"
            style="background: linear-gradient(to bottom, transparent, var(--card))"></div>
       <span class="absolute top-4 left-4 px-4 py-2 rounded-full font-bold text-[15px]"

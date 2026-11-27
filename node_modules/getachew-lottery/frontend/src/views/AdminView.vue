@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import Icon from '@/components/Icon.vue'
-import { api, ApiError } from '@/services/api'
+import { api, ApiError, asset } from '@/services/api'
 import { fmt, pad4 } from '@/services/format'
 import { useApp } from '@/stores/app'
 import { ask } from '@/services/telegram'
@@ -200,8 +200,8 @@ const dt = (d) => new Date(d).toLocaleString('en-GB', { day: 'numeric', month: '
       <div class="muted text-[13px]">Telegram ID {{ o.user }}<span v-if="o.bank"> · {{ o.bank }}</span><span v-if="o.senderAccount"> · from {{ o.senderAccount }}</span></div>
       <div class="flex flex-wrap gap-2 mt-2"><span v-for="n in o.numbers" :key="n" class="num-chip">{{ pad4(n) }}</span></div>
       <div class="flex items-center gap-3 mt-3">
-        <a :href="o.receiptUrl" target="_blank" rel="noopener" class="flex-none">
-          <img :src="o.receiptUrl" alt="receipt" class="w-20 h-20 rounded-xl object-cover" style="border: 1px solid var(--line)" />
+        <a :href="asset(o.receiptUrl)" target="_blank" rel="noopener" class="flex-none">
+          <img :src="asset(o.receiptUrl)" alt="receipt" class="w-20 h-20 rounded-xl object-cover" style="border: 1px solid var(--line)" />
         </a>
         <div class="flex-1 text-right"><div class="muted text-[13px]">Total</div><b class="font-display text-[22px] gold">{{ fmt(o.total) }} Birr</b></div>
       </div>
@@ -243,7 +243,7 @@ const dt = (d) => new Date(d).toLocaleString('en-GB', { day: 'numeric', month: '
 
     <article v-for="l in lotteries" :key="l.id" class="card p-4 mb-3">
       <div class="flex gap-3">
-        <img :src="l.imageUrl" alt="" class="w-20 h-20 rounded-2xl object-cover flex-none" />
+        <img :src="asset(l.imageUrl)" alt="" class="w-20 h-20 rounded-2xl object-cover flex-none" />
         <div class="min-w-0 flex-1">
           <b class="block truncate">{{ l.title }}</b>
           <div class="muted text-[13px]">{{ l.carName }} · {{ l.carColor }}</div>

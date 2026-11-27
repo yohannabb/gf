@@ -5,7 +5,7 @@ import Icon from '@/components/Icon.vue'
 import Countdown from '@/components/Countdown.vue'
 import NumberPicker from '@/components/NumberPicker.vue'
 import OrderFlow from '@/components/OrderFlow.vue'
-import { api } from '@/services/api'
+import { api, asset } from '@/services/api'
 import { t } from '@/i18n'
 import { fmt, pad4 } from '@/services/format'
 import { useApp } from '@/stores/app'
@@ -102,7 +102,7 @@ function finished() {
     <!-- car card -->
     <article class="card">
       <div class="relative" style="height: 232px">
-        <img :src="l.imageUrl" :alt="l.carName" class="w-full h-full object-cover" />
+        <img :src="asset(l.imageUrl)" :alt="l.carName" class="w-full h-full object-cover" />
         <div class="absolute inset-x-0 bottom-0 h-28"
              style="background: linear-gradient(to bottom, transparent, var(--card))"></div>
         <span class="absolute top-4 left-4 px-4 py-2 rounded-full font-bold text-[15px]"

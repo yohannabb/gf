@@ -1,4 +1,5 @@
 <script setup>
+import { asset } from '@/services/api'
 import { computed } from 'vue'
 import { t } from '@/i18n'
 import { fmt } from '@/services/format'
@@ -13,7 +14,7 @@ const left = computed(() => {
 
 <template>
   <router-link :to="`/lottery/${l.id}`" class="card flex gap-3 p-3 no-underline" style="color: inherit">
-    <img :src="l.imageUrl" :alt="l.carName" class="w-24 h-24 rounded-2xl object-cover flex-none" />
+    <img :src="asset(l.imageUrl)" :alt="l.carName" class="w-24 h-24 rounded-2xl object-cover flex-none" />
     <div class="min-w-0 flex-1 flex flex-col">
       <div class="font-display font-bold text-[18px] truncate">{{ l.carName }}</div>
       <div class="text-[13px] font-semibold" style="color: var(--green)">{{ l.carColor }}</div>
