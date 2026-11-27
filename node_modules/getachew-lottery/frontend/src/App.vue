@@ -7,6 +7,8 @@ import { t } from '@/i18n'
 
 const app = useApp()
 onMounted(app.init)
+const hasTelegramData = !!window.Telegram?.WebApp?.initData
+const site = location.host
 </script>
 
 <template>
@@ -21,6 +23,9 @@ onMounted(app.init)
     <p class="muted leading-relaxed px-4">
       <template v-if="app.authError === 'network'">{{ t('errNetwork') }}</template>
       <template v-else>{{ t('openInBot') }}</template>
+    </p>
+    <p class="muted text-[12px] mt-8" style="opacity: .6">
+      code: {{ app.authError }} · telegram data: {{ hasTelegramData ? 'yes' : 'no' }} · {{ site }}
     </p>
   </div>
 
