@@ -145,21 +145,28 @@ const close = () => (step.value === 4 ? emit('finished') : emit('close'))
     <div v-else-if="step === 2">
       <p class="muted font-semibold text-[14px] mt-0">{{ t('selectBank') }}</p>
       <div class="flex flex-col gap-3">
-        <div v-for="b in banks" :key="b.id" role="button" tabindex="0"
-             class="flex items-center gap-3 p-4 rounded-3xl"
+        <div v-for="b in banks" :key="b.id" role="button" tabindex="0" class="p-4 rounded-3xl"
              :style="{ background: 'var(--card)', border: '1px solid ' + (bankId === b.id ? 'var(--gold)' : 'var(--line)') }"
              @click="bankId = bankId === b.id ? null : b.id" @keydown.enter="bankId = bankId === b.id ? null : b.id">
-          <span class="grid place-items-center w-12 h-12 rounded-2xl flex-none"
-                style="background: var(--well); color: #2dd4bf"><Icon name="building" :size="24" /></span>
-          <div class="min-w-0 flex-1">
-            <div class="font-bold text-[17px] leading-tight">{{ b.bankName }}</div>
-            <div class="muted text-[13px]">{{ b.accountName }}</div>
+          <div class="flex items-center gap-3">
+            <span class="grid place-items-center w-12 h-12 rounded-2xl flex-none"
+                  style="background: var(--well); color: #2dd4bf"><Icon name="building" :size="24" /></span>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-[18px] leading-tight">{{ b.bankName }}</div>
+              <div class="muted text-[13px] mt-0.5">{{ b.accountName }}</div>
+            </div>
+            <span v-if="bankId === b.id" class="gold flex-none"><Icon name="check" :size="22" :stroke="3" /></span>
           </div>
-          <b class="text-[17px]">{{ b.accountNumber }}</b>
-          <button class="btn-sm btn flex-none" style="background: var(--well); color: var(--text); gap: 6px"
-                  @click.stop="copy(b.accountNumber)">
-            <Icon name="copy" :size="16" /> {{ t('copy') }}
-          </button>
+          <div class="flex items-center justify-between gap-3 mt-3 pt-3" style="border-top: 1px solid var(--line)">
+            <div class="min-w-0">
+              <div class="muted text-[12px]">{{ t('accountNumber') }}</div>
+              <b class="font-display text-[22px] select-all break-all" style="letter-spacing: .04em">{{ b.accountNumber }}</b>
+            </div>
+            <button class="btn-sm btn flex-none" style="background: var(--well); color: var(--text); gap: 6px"
+                    @click.stop="copy(b.accountNumber)">
+              <Icon name="copy" :size="16" /> {{ t('copy') }}
+            </button>
+          </div>
         </div>
       </div>
 

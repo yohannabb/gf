@@ -165,6 +165,39 @@ async function sendAnnouncement(test) {
 watch(tab, (v) => v === 'announce' && loadCasts())
 onUnmounted(() => clearTimeout(poll))
 
+/* ---------------- users ---------------- */
+const users = ref([])
+const userTotals = ref(null)
+const userMatched = ref(0)
+const userFilter = ref('registered')
+const userQ = ref('')
+const usersLoading = ref(false)
+const LANG_NAME = { om: 'Afaan Oromo', am: 'አማርኛ', en: 'English' }
+const day = (d) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+const chatLink = (u) => (u.username ? `https://t.me/${u.username}` : `tg://user?id=${u.id}`)
+
+async function loadUsers(more = false) {
+  usersLoading.value = true
+  try {
+    const skip = more ? users.value.length : 0
+    const r = await api.get(`/api/admin/users?filter=${userFilter.value}&q=${encodeURIComponent(userQ.value.trim())}&skip=${skip}&limit=30`)
+    users.value = more ? [...users.value, ...r.users] : r.users
+    userTotals.value = r.totals
+    userMatched.value = r.matched
+  } catch (e) {
+    fail(e)
+  } finally {
+    usersLoading.value = false
+  }
+}
+let userTimer
+watch(userQ, () => {
+  clearTimeout(userTimer)
+  userTimer = setTimeout(() => loadUsers(), 350)
+})
+watch(userFilter, () => loadUsers())
+watch(tab, (v) => v === 'users' && loadUsers())
+
 onMounted(() => { loadStats(); loadOrders(); loadLotteries(); loadBanks() })
 const statusColor = { PENDING: 'var(--gold)', APPROVED: 'var(--green)', REJECTED: 'var(--red)' }
 const dt = (d) => new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
@@ -176,10 +209,12 @@ const dt = (d) => new Date(d).toLocaleString('en-GB', { day: 'numeric', month: '
   <div v-if="stats" class="grid grid-cols-2 gap-3 mb-4">
     <div class="card p-4"><div class="muted text-[13px]">Pending orders</div><b class="font-display text-[26px] gold">{{ stats.pending }}</b></div>
     <div class="card p-4"><div class="muted text-[13px]">Tickets sold</div><b class="font-display text-[26px]">{{ fmt(stats.ticketsTaken) }}</b></div>
+    <div class="card p-4"><div class="muted text-[13px]">Registered users</div><b class="font-display text-[26px]">{{ fmt(stats.registered) }}</b></div>
+    <div class="card p-4"><div class="muted text-[13px]">Started the bot</div><b class="font-display text-[26px]">{{ fmt(stats.users) }}</b></div>
   </div>
 
   <div class="flex gap-2 mb-4">
-    <button v-for="x in ['orders', 'lotteries', 'banks', 'announce']" :key="x" class="chip capitalize" :class="{ on: tab === x }" @click="tab = x">{{ x }}</button>
+    <button v-for="x in ['orders', 'lotteries', 'banks', 'users', 'announce']" :key="x" class="chip capitalize" :class="{ on: tab === x }" @click="tab = x">{{ x }}</button>
   </div>
 
   <!-- ORDERS -->
@@ -261,6 +296,53 @@ const dt = (d) => new Date(d).toLocaleString('en-GB', { day: 'numeric', month: '
         <button class="btn btn-danger btn-sm" @click="removeLottery(l)"><Icon name="trash" :size="16" /></button>
       </div>
     </article>
+  </section>
+
+  <!-- USERS -->
+  <section v-if="tab === 'users'">
+    <div class="flex gap-2 mb-3 overflow-x-auto">
+      <button class="chip" :class="{ on: userFilter === 'registered' }" @click="userFilter = 'registered'">
+        Registered<span v-if="userTotals"> · {{ fmt(userTotals.registered) }}</span>
+      </button>
+      <button class="chip" :class="{ on: userFilter === 'started' }" @click="userFilter = 'started'">
+        Started only<span v-if="userTotals"> · {{ fmt(userTotals.started) }}</span>
+      </button>
+      <button class="chip" :class="{ on: userFilter === 'all' }" @click="userFilter = 'all'">
+        All<span v-if="userTotals"> · {{ fmt(userTotals.all) }}</span>
+      </button>
+    </div>
+    <div class="ibox mb-3"><input v-model="userQ" type="search" placeholder="Search name, @username, phone or Telegram ID" maxlength="40" /></div>
+    <p class="muted text-[12px] mt-0 mb-3">
+      <b>Registered</b> = finished sign-up (shared their own phone). <b>Started only</b> = pressed START but did not finish.
+    </p>
+
+    <p v-if="!users.length && !usersLoading" class="muted text-center py-10">No users found.</p>
+    <article v-for="u in users" :key="u.id" class="card p-4 mb-3">
+      <div class="flex justify-between items-start gap-2">
+        <div class="min-w-0">
+          <b class="block text-[17px] truncate">{{ u.firstName || '(no name)' }}</b>
+          <span v-if="u.username" class="muted text-[13px]">@{{ u.username }}</span>
+        </div>
+        <div class="flex gap-1.5 flex-none">
+          <span v-if="u.isAdmin" class="text-[11px] font-bold px-2 py-1 rounded-full" style="color: var(--gold); border: 1px solid var(--gold)">ADMIN</span>
+          <span class="text-[11px] font-bold px-2 py-1 rounded-full"
+                :style="{ color: u.registered ? 'var(--green)' : 'var(--muted)', border: '1px solid ' + (u.registered ? 'var(--green)' : 'var(--line)') }">
+            {{ u.registered ? 'REGISTERED' : 'NOT FINISHED' }}
+          </span>
+        </div>
+      </div>
+      <div class="mt-2 text-[15px]">{{ u.phone || 'No phone yet' }}</div>
+      <div class="muted text-[13px] mt-1">
+        ID {{ u.id }} · {{ LANG_NAME[u.language] || 'no language' }} · joined {{ day(u.joinedAt) }}
+      </div>
+      <div class="flex items-center justify-between mt-3">
+        <span class="text-[14px]">🧾 {{ u.orders }} order(s) · 🎟 <b class="gold">{{ u.tickets }}</b> ticket(s)</span>
+        <a :href="chatLink(u)" target="_blank" rel="noopener" class="btn btn-ghost btn-sm no-underline" style="color: var(--text)">Open chat</a>
+      </div>
+    </article>
+    <button v-if="users.length < userMatched" class="btn btn-ghost btn-sm w-full" :disabled="usersLoading" @click="loadUsers(true)">
+      {{ usersLoading ? 'Loading…' : `Load more (${users.length} of ${userMatched})` }}
+    </button>
   </section>
 
   <!-- ANNOUNCE -->
